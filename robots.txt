@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://heartrisk.vercel.app/sitemap.xml

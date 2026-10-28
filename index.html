@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HeartRisk — Heart Disease Risk Predictor | AI/ML Project by Vikranth Reddy</title>
+<meta name="description" content="HeartRisk estimates heart-disease risk from age, blood pressure, cholesterol, heart rate and exercise readings, using logistic regression. Try the interactive browser demo.">
+<meta property="og:title" content="HeartRisk — Heart Disease Risk Predictor">
+<meta property="og:description" content="Logistic regression estimates heart-disease risk in seconds. Try the interactive demo.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://heartrisk.vercel.app/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HeartRisk — Heart Disease Risk Predictor">
+<meta name="twitter:description" content="Logistic regression estimates heart-disease risk in seconds.">
+<link rel="canonical" href="https://heartrisk.vercel.app/">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"HeartRisk","applicationCategory":"AI/ML demo","author":{"@type":"Person","name":"Vikranth Reddy"},"description":"Heart disease risk predictor using logistic regression."}
+</script>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;color:#000;background:#fff;max-width:760px;margin:0 auto;padding:24px;line-height:1.5}
+h1{font-size:2em;margin-bottom:0}.sub{color:#333;margin-top:4px}
+label{display:block;margin:14px 0 2px;font-weight:bold}
+input,select{width:100%;padding:8px;font-size:16px;border:1px solid #000;border-radius:4px;box-sizing:border-box}
+button{margin-top:18px;padding:12px 24px;font-size:17px;background:#000;color:#fff;border:0;border-radius:4px;cursor:pointer}
+button.preset{background:#fff;color:#000;border:1px solid #000;margin-right:8px}
+#out{margin-top:22px;padding:18px;border:2px solid #000;border-radius:6px;font-size:1.3em}
+small{color:#333}.row{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+@media(max-width:600px){.row{grid-template-columns:1fr}}
+.bar{height:18px;background:#eee;border:1px solid #000;margin-top:10px}#fill{height:100%;background:#000;width:0%}
+</style>
+</head>
+<body>
+<h1>HeartRisk</h1>
+<p class="sub">Heart Disease Risk Predictor — logistic regression, trained on 900 synthetic patient records. All prediction happens in your browser; no data leaves this page.</p>
+<p><b>For learning only — not medical advice.</b> A real check-up needs a doctor, an ECG and lab tests. This demo shows how a simple ML model turns health readings into a risk score.</p>
+<div class="row">
+<div><label>Age (years)</label><input id="age" type="number" min="29" max="77" value="55"></div>
+<div><label>Sex</label><select id="sex"><option value="0">Female</option><option value="1" selected>Male</option></select></div>
+<div><label>Resting blood pressure (mm Hg)</label><input id="bp" type="number" min="94" max="200" value="140"></div>
+<div><label>Cholesterol (mg/dl)</label><input id="chol" type="number" min="126" max="564" value="260"></div>
+<div><label>Max heart rate achieved</label><input id="hr" type="number" min="71" max="202" value="150"></div>
+<div><label>Fasting blood sugar &gt; 120 mg/dl</label><select id="bs"><option value="0" selected>No</option><option value="1">Yes</option></select></div>
+<div><label>Exercise-induced angina (chest pain on exertion)</label><select id="ang"><option value="0" selected>No</option><option value="1">Yes</option></select></div>
+<div><label>ST depression (oldpeak, exercise vs rest)</label><input id="old" type="number" min="0" max="6.2" step="0.1" value="1.0"></div>
+</div>
+<button onclick="predict()">Predict heart-disease risk</button>
+<div>
+<button class="preset" onclick="preset(55,1,140,260,150,0,0,1.0)">Typical middle-aged profile</button>
+<button class="preset" onclick="preset(38,0,110,180,175,0,0,0.0)">Young healthy profile</button>
+<button class="preset" onclick="preset(70,1,180,380,100,1,1,3.5)">High-risk profile</button>
+</div>
+<div id="out">Enter the readings and press Predict heart-disease risk.</div>
+<div class="bar"><div id="fill"></div></div>
+<p><small>Model: 5-fold cross-validated accuracy = 75.1%, AUC = 0.83 (guessing the majority class: 50.3% — about 1.5&times; better). Risk above 50% is flagged as high risk. Strongest drivers: ST depression, low max heart rate and high cholesterol — matching known cardiac risk factors. Trained on synthetic data for learning purposes.</small></p>
+<p><small>By Vikranth Reddy — B.Tech CSE (AI &amp; ML), Woxsen University. <a href="https://github.com/HVRGAMING2705/heartrisk">GitHub repo</a></small></p>
+<script>
+const MEANS=[52.826762883159525, 0.4766666666666667, 147.05970156497708, 345.83956578319277, 135.18343229772375, 0.5144444444444445, 0.4955555555555556, 3.026845023865367];
+const STDS=[13.951079655203195, 0.49945525881259534, 30.91604861901615, 126.0906395118938, 37.86853883230417, 0.49979131447504305, 0.4999802465233805, 1.7751345826209757];
+const COEF=[0.5187660088397176, 0.3534631657307655, 0.23808697529286094, 0.6340547848781807, -0.7904978813262618, 0.3011183020436808, 0.29140034152629474, 1.0516572771048993];
+const INTERCEPT=0.010815352734843523;
+function modelProb(v){let s=INTERCEPT;for(let i=0;i<8;i++)s+=COEF[i]*((v[i]-MEANS[i])/STDS[i]);return 1/(1+Math.exp(-s));}
+function predict(){const v=[+document.getElementById('age').value,+document.getElementById('sex').value,+document.getElementById('bp').value,+document.getElementById('chol').value,+document.getElementById('hr').value,+document.getElementById('bs').value,+document.getElementById('ang').value,+document.getElementById('old').value];
+const p=modelProb(v);const verdict=p>=0.5?'High risk — see a doctor for a real check-up':'Lower risk';
+document.getElementById('out').innerHTML='Heart-disease risk: <b>'+(p*100).toFixed(1)+'%</b> — '+verdict;
+document.getElementById('fill').style.width=(p*100)+'%';}
+function preset(a,b,c,d,e,f,g,h){document.getElementById('age').value=a;document.getElementById('sex').value=b;document.getElementById('bp').value=c;document.getElementById('chol').value=d;document.getElementById('hr').value=e;document.getElementById('bs').value=f;document.getElementById('ang').value=g;document.getElementById('old').value=h;predict();}
+</script>
+</body>
+</html>
