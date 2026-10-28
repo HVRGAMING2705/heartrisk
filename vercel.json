@@ -29,7 +29,7 @@
         },
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://heartrisk.vercel.app"
+          "value": "https://heartrisk-ten.vercel.app"
         },
         {
           "key": "Content-Security-Policy",

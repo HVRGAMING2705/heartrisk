@@ -11,6 +11,6 @@ sugar, exercise-induced angina, ST depression (oldpeak).
 
 For learning only — not medical advice.
 
-Live demo: https://heartrisk.vercel.app
+Live demo: https://heartrisk-ten.vercel.app
 
 By Vikranth Reddy — B.Tech CSE (AI & ML), Woxsen University.
